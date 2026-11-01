@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from 'react-router'
 import { filesApi } from '../api/files.js'
 import { projectsApi } from '../api/projects.js'
 import { Brand } from '../components/Brand.jsx'
+import { ChatPanel } from '../components/workspace/ChatPanel.jsx'
 import { CodeEditorPane } from '../components/workspace/CodeEditorPane.jsx'
 import { FileExplorer } from '../components/workspace/FileExplorer.jsx'
 
@@ -259,7 +260,7 @@ export function WorkspacePage() {
         )}
       </header>
 
-      <div className="h-[calc(100svh-52px)]">
+      <div className="workspace-grid h-[calc(100svh-52px)]">
         <div className="h-full min-h-0 min-w-0">
             <div className="workspace-code-grid h-full">
               <FileExplorer
@@ -282,6 +283,7 @@ export function WorkspacePage() {
               />
             </div>
         </div>
+        <ChatPanel projectId={projectId} />
       </div>
     </main>
   )
