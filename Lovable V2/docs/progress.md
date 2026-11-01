@@ -16,3 +16,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(auth): add logout and session revocation | Clear the refresh cookie and stored session hash when signing out; complete token response and persistence helpers. | Tests deferred by user |
 | feat(projects): configure project persistence and HTTP service | Define project ownership and lifecycle states, connect MongoDB, and expose service status endpoints. | Tests deferred by user |
 | feat(projects): add durable project event publishing | Initialize the AMQP channel and publish project lifecycle messages to durable queues. | Tests deferred by user |
+| feat(projects): list projects for the authenticated owner | Validate bearer sessions and return the caller's projects ordered by creation time. | Tests deferred by user |
