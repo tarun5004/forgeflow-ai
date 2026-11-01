@@ -29,3 +29,37 @@ export async function getFiles(req: Request, res: Response, next: NextFunction) 
     }
 }
 
+export async function createFiles(req: Request, res: Response, next: NextFunction) {
+    try {
+        const files = await fileService.writeFiles(asFilePayload(req.body));
+        res.status(201).json({ success: true, message: "File created successfully", files });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function updateFiles(req: Request, res: Response, next: NextFunction) {
+    try {
+        const files = await fileService.writeFiles(asFilePayload(req.body));
+        res.json({ success: true, message: "File updated successfully", files });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function removeFiles(req: Request, res: Response, next: NextFunction) {
+    try {
+        const filenames = parseFilenamesQuery(req.query.filenames);
+        const files = await fileService.deleteFiles(filenames);
+        res.json({ success: true, message: "Files deleted successfully", files });
+    } catch (error) {
+        next(error);
+    }
+}
+
+function asFilePayload(body: unknown): Record<string, string> {
+    if (typeof body !== "object" || body === null || Array.isArray(body)) {
+        throw new HttpError(400, "Request body must be a JSON object of filename -> content");
+    }
+    return body as Record<string, string>;
+}

@@ -25,3 +25,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(runtime): proxy preview and file service traffic | Route runtime hostnames to their Kubernetes services, cache proxy handlers, and invalidate them after idle teardown. | Tests deferred by user |
 | feat(files): expose the runtime file tree | Walk the runtime folder, omit configured generated paths, and return a sorted project-relative file tree. | Tests deferred by user |
 | feat(files): read selected runtime files | Parse requested filenames, resolve project-relative paths, and return UTF-8 contents through the file API. | Tests deferred by user |
+| feat(files): create update and delete runtime files | Validate filename-to-content payloads, create parent directories, write files, and remove selected paths. | Tests deferred by user |

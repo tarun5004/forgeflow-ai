@@ -43,3 +43,38 @@ export async function readFiles(filenames: string[]): Promise<Record<string, str
   return contents;
 }
 
+export async function writeFiles(payload: Record<string, string>): Promise<string[]> {
+  const entries = Object.entries(payload);
+
+  if (entries.length === 0) {
+    throw new HttpError(400, "Request body must contain at least one file");
+  }
+
+  await Promise.all(
+    entries.map(async ([filename, content]) => {
+      if (typeof content !== "string") {
+        throw new HttpError(400, `Content for ${filename} must be a string`);
+      }
+      const absolute = toAbsolutePath(filename);
+      await fs.mkdir(path.dirname(absolute), { recursive: true });
+      await fs.writeFile(absolute, content, "utf8");
+    }),
+  );
+
+  return entries.map(([filename]) => filename);
+}
+
+export async function deleteFiles(filenames: string[]): Promise<string[]> {
+  await Promise.all(
+    filenames.map(async (filename) => {
+      const absolute = toAbsolutePath(filename);
+      try {
+        await fs.rm(absolute, { recursive: true, force: false });
+      } catch {
+        throw new HttpError(404, `File not found: ${filename}`);
+      }
+    }),
+  );
+
+  return filenames;
+}
