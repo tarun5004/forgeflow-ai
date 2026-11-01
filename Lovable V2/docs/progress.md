@@ -30,3 +30,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(sync): restore project files during runtime startup | Restore remote files when a project has saved objects; otherwise seed storage from the local runtime template. | Tests deferred by user |
 | feat(sync): batch runtime file changes for persistence | Watch file changes with debounce and maximum-wait bounds, limit parallel uploads, batch deletions, and close the watcher on shutdown. | Tests deferred by user |
 | feat(ai): configure persisted AI project service | Initialize project metadata storage, required provider configuration, centralized errors, and HTTP status endpoints. | Tests deferred by user |
+| feat(ai): consume project creation events | Connect the message broker and create AI-side project records from project_created messages. | Tests deferred by user |
