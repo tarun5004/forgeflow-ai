@@ -1,6 +1,8 @@
-# Verification progress
+# Implementation progress
 
-Original reference is read-only. All commits are current reconstruction work.
+The reference directory is read-only. Commits use actual timestamps.
+
+Latest user direction: finish feature commits first; application tests and fixes are deferred. Earlier checks below are historical results, not verification of the final complete project.
 
 | Feature | Verification | Result |
 | --- | --- | --- |
@@ -9,4 +11,5 @@ Original reference is read-only. All commits are current reconstruction work.
 | feature/v2-auth-registration | Accepts account details, hashes passwords and returns a signed session. Verification: TypeScript build and 4 HTTP tests passed; persistence mocked. | Verified locally |
 | feature/v2-auth-login | Verifies stored password hashes and returns a signed session; wrong passwords return 401. Build and 6 HTTP tests passed; persistence mocked. | Verified locally |
 | feature/v2-auth-profile | Validates bearer tokens and returns only the signed-in user profile. Build and 8 HTTP tests passed; persistence mocked. | Verified locally |
-| feature/v2-auth-refresh | Issues renewed sessions from refresh cookies. Build passed; five token/error regression cases reproduced failures and await the fix before merge. | Verified locally |
+| feature/v2-auth-refresh | Issues renewed sessions from refresh cookies. Build passed; five token/error regression cases reproduced failures. Fix and rerun deferred by user. | Known failures; fix deferred |
+| docs: prioritize functional commits before verification | Complete the code in focused commits, then verify each feature and address confirmed defects separately. | Tests deferred by user |

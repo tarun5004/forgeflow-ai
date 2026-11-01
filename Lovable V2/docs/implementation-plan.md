@@ -1,16 +1,16 @@
 # Implementation plan
 
-Build each slice on a dedicated `feature/v2-*` branch from current main. Commits describe work actually performed now, with the original implementation as reference. Verify the slice, review its diff, then merge locally. Do not stage incomplete later features.
+Current phase: complete all seven packages and deployment configuration in small functional commits on main. The latest user instruction defers builds, tests, infrastructure execution, and bug fixes until all code is present. Earlier feature branches and history remain preserved.
 
-1. Project setup and local data services.
-2. Auth: application/model configuration, registration, login, access/profile, refresh rotation, logout. Fix reproduced token/error defects separately; retain existing contracts.
-3. Projects: owned project metadata, project-created AMQP event, Kubernetes runtime lifecycle, authenticated runtime file proxy, Redis idle cleanup.
-4. File API: safe path handling and file tree, reads, writes/deletes. Verify hostile paths and direct secret-file access.
-5. Sync: S3 storage/bootstrap, watcher batching, upload recovery and shutdown flush.
-6. AI: persisted project/conversations, broker ingestion, filesystem tools, real-provider streaming and history. Real calls wait for the user's key.
-7. Next.js runtime: complete existing template and container integration.
-8. Frontend: shell/session, registration/login pages, projects, file explorer/editor, conversations/chat, preview. Fix confirmed URL/contract defects.
-9. Infrastructure: original manifests and reviewed reference assets, disposable local Kubernetes deployment and local S3-compatible storage support.
-10. Build/check all packages; run local auth/project/broker/file/storage/preview/browser integration and provide video-ready localhost instructions. Report real-provider verification separately.
+1. Complete Auth endpoints and token persistence utilities.
+2. Add Project configuration/model, event publishing, owned listing/creation, Kubernetes resources, runtime launch, Redis idle cleanup, and runtime proxying.
+3. Add file tree, reads, writes, and deletion APIs.
+4. Add S3 object operations, startup restore, and debounced filesystem synchronization.
+5. Add AI configuration/models, broker events, conversations/history, filesystem tools, model orchestration, and SSE streaming.
+6. Add Next.js setup, layout/assets, page, and container recipe.
+7. Add frontend shell, session/forms, projects, file editor, conversations/chat, and preview.
+8. Add deployment manifests, RBAC, sanitized secret templates, Skaffold, reviewed deployment notes, and local dependency configuration.
+9. Verify file completeness, lockfile equality, credential exclusions, staging scope, and commit coverage. These are repository-integrity checks, not application tests.
+10. Later, test each feature and fix confirmed defects in separate commits. Then run the local cross-service/browser flow when Docker resources and provider availability allow it.
 
-No additional application dependency is planned. Use Node's built-in test runner and existing package tools. A local Kubernetes CLI/container and data-service images are development infrastructure, not architecture replacements.
+No architecture rewrite or new application dependency is planned. Do not backdate, rewrite existing commits, push, or deploy cloud resources.
