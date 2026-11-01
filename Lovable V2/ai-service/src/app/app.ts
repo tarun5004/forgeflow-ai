@@ -1,6 +1,6 @@
 import express from 'express';
 import morgan from 'morgan';
-
+import router from './index.routes.js';
 import { errorHandler } from '../middlewares/error.middleware.js';
 
 
@@ -10,7 +10,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 
-
+app.use('/api/ai', router);
 
 app.get("/_status/healthz", (req, res) => {
     res.status(200).json({
