@@ -2,6 +2,7 @@ import { ConversationModel } from "../models/conversation.model.js";
 import { ProjectModel } from "../models/project.model.js";
 import type { NextFunction, Request, Response } from "express";
 import { AppError } from "../middlewares/error.middleware.js";
+import { MessageModel } from "../models/message.model.js";
 
 
 
@@ -81,6 +82,38 @@ export async function createConversationController(req: Request, res: Response, 
                 createdAt: conversation.createdAt,
                 updatedAt: conversation.updatedAt
             }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+/**
+ * GET /api/ai/conversations/:conversationId/messages
+ *
+ * Only user prompts and assistant prose are returned; tool calls and tool
+ * results are internal agent bookkeeping and never reach the client.
+ */
+export async function listMessagesController(req: Request, res: Response, next: NextFunction) {
+    try {
+        const conversation = await requireConversation(req.user!.id, String(req.params.conversationId));
+
+        const messages = await MessageModel.find({
+            conversationId: conversation.id,
+            author: { $in: ["user", "ai"] }
+        }).sort({ createdAt: 1 });
+
+        res.json({
+            conversation: { _id: conversation.id, title: conversation.title },
+            messages: messages
+                .filter(message => (message.content || "").trim().length > 0)
+                .map(message => ({
+                    _id: message.id,
+                    author: message.author,
+                    content: message.content || "",
+                    createdAt: message.createdAt
+                }))
         });
     } catch (error) {
         next(error);
