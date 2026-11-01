@@ -1,0 +1,136 @@
+import bcrypt from "bcryptjs";
+import type { NextFunction, Request, Response } from "express";
+import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
+import { env } from "../config/env.js";
+import { createUser, findUserByEmail, setRefreshTokenHash } from "../DAO/user.dao.js";
+import { AppError } from "../middlewares/error.middleware.js";
+import type { AuthTokenPayload, LoginRequestBody, RegisterRequestBody, UserInfo } from "../types/user.js";
+import { getRefreshTokenCookieOptions } from "../utils/token.util.js";
+const SALT_ROUNDS = 10;
+
+/**
+ * Signs a JWT with a typed secret and expiry value.
+ *
+ * @param payload - JWT payload to sign.
+ * @param secret - Secret used to sign the token.
+ * @param expiresIn - Time-to-live string value.
+ * @returns Signed JWT string.
+ */
+function signToken(payload: AuthTokenPayload, secret: Secret, expiresIn: string): string {
+  return jwt.sign(payload, secret, {
+    expiresIn: expiresIn as SignOptions["expiresIn"],
+  });
+}
+
+/**
+ * Validates a trimmed email string with a simple format check.
+ *
+ * @param value - Raw value to validate.
+ * @returns True when the value is a valid email address.
+ */
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+/**
+ * Validates a required string field.
+ *
+ * @param value - Input value to validate.
+ * @param fieldName - Field name used for errors.
+ * @returns A trimmed string or throws an error.
+ */
+function validateRequiredString(value: unknown, fieldName: string): string {
+  if (typeof value !== "string") {
+    throw new AppError(400, `${fieldName} is required.`);
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    throw new AppError(400, `${fieldName} is required.`);
+  }
+
+  return trimmed;
+}
+
+/**
+ * Registers a new user and issues both tokens.
+ *
+ * @route POST /api/auth/register
+ * @param req - Incoming request containing name, email, and password.
+ * @param res - Express response.
+ * @param next - Error middleware callback.
+ */
+export async function register(
+  req: Request<{}, {}, RegisterRequestBody>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const name = validateRequiredString(req.body?.name, "name");
+    const email = validateRequiredString(req.body?.email, "email");
+    const password = validateRequiredString(req.body?.password, "password");
+
+    if (name.length < 2) {
+      throw new AppError(400, "name must be at least 2 characters long.");
+    }
+
+    if (!isValidEmail(email)) {
+      throw new AppError(400, "Invalid email format.");
+    }
+
+    if (password.length < 8) {
+      throw new AppError(400, "password must be at least 8 characters long.");
+    }
+
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
+      throw new AppError(409, "Email already registered.");
+    }
+
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    const user = await createUser({
+      name,
+      email: email.toLowerCase(),
+      passwordHash,
+    });
+
+    const safeUser = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    };
+
+    const accessToken = signToken(
+      {
+        sub: safeUser.id,
+        email: safeUser.email,
+        name: safeUser.name,
+      },
+      env.ACCESS_TOKEN_SECRET,
+      env.ACCESS_TOKEN_EXPIRY,
+    );
+
+    const refreshToken = signToken(
+      {
+        sub: safeUser.id,
+        email: safeUser.email,
+        name: safeUser.name,
+      },
+      env.REFRESH_TOKEN_SECRET,
+      env.REFRESH_TOKEN_EXPIRY,
+    );
+
+    await setRefreshTokenHash(safeUser.id, bcrypt.hashSync(refreshToken, SALT_ROUNDS));
+
+    res.setHeader("Authorization", `Bearer ${accessToken}`);
+    res.cookie("refreshToken", refreshToken, getRefreshTokenCookieOptions());
+    res.status(201).json({
+      user: safeUser,
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
