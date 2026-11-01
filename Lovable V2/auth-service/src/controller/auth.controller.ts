@@ -134,3 +134,78 @@ export async function register(
     next(error);
   }
 }
+
+/**
+ * Authenticates an existing user and issues both tokens.
+ *
+ * @route POST /api/auth/login
+ * @param req - Incoming request containing email and password.
+ * @param res - Express response.
+ * @param next - Error middleware callback.
+ */
+export async function login(
+  req: Request<{}, {}, LoginRequestBody>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const email = validateRequiredString(req.body?.email, "email");
+    const password = validateRequiredString(req.body?.password, "password");
+
+    if (!isValidEmail(email)) {
+      throw new AppError(400, "Invalid email format.");
+    }
+
+    if (password.length < 8) {
+      throw new AppError(400, "password must be at least 8 characters long.");
+    }
+
+    const user = await findUserByEmail(email);
+    if (!user) {
+      throw new AppError(401, "Invalid email or password.");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new AppError(401, "Invalid email or password.");
+    }
+
+    const safeUser = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    };
+
+    const accessToken = signToken(
+      {
+        sub: safeUser.id,
+        email: safeUser.email,
+        name: safeUser.name,
+      },
+      env.ACCESS_TOKEN_SECRET,
+      env.ACCESS_TOKEN_EXPIRY,
+    );
+
+    const refreshToken = signToken(
+      {
+        sub: safeUser.id,
+        email: safeUser.email,
+        name: safeUser.name,
+      },
+      env.REFRESH_TOKEN_SECRET,
+      env.REFRESH_TOKEN_EXPIRY,
+    );
+
+    await setRefreshTokenHash(safeUser.id, bcrypt.hashSync(refreshToken, SALT_ROUNDS));
+
+    res.setHeader("Authorization", `Bearer ${accessToken}`);
+    res.cookie("refreshToken", refreshToken, getRefreshTokenCookieOptions());
+    res.status(200).json({
+      user: safeUser,
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
