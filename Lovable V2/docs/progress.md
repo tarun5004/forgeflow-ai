@@ -9,3 +9,4 @@ Original reference is read-only. All commits are current reconstruction work.
 | feature/v2-auth-registration | Accepts account details, hashes passwords and returns a signed session. Verification: TypeScript build and 4 HTTP tests passed; persistence mocked. | Verified locally |
 | feature/v2-auth-login | Verifies stored password hashes and returns a signed session; wrong passwords return 401. Build and 6 HTTP tests passed; persistence mocked. | Verified locally |
 | feature/v2-auth-profile | Validates bearer tokens and returns only the signed-in user profile. Build and 8 HTTP tests passed; persistence mocked. | Verified locally |
+| feature/v2-auth-refresh | Issues renewed sessions from refresh cookies. Build passed; five token/error regression cases reproduced failures and await the fix before merge. | Verified locally |

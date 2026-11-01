@@ -244,3 +244,84 @@ export async function me(
     next(error);
   }
 }
+
+/**
+ * Refreshes the access token using an HTTP-only refresh cookie.
+ *
+ * @route POST /api/auth/refresh
+ * @param req - Incoming request containing the refresh token cookie.
+ * @param res - Express response.
+ * @param next - Error middleware callback.
+ */
+export async function refresh(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const refreshToken = req.cookies?.refreshToken as string | undefined;
+    if (!refreshToken) {
+      throw new AppError(401, "Refresh token missing.");
+    }
+
+    const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET) as {
+      sub?: string;
+      email?: string;
+      name?: string;
+    };
+
+    if (!decoded.sub) {
+      throw new AppError(401, "Invalid refresh token.");
+    }
+
+    const user = await findUserById(decoded.sub);
+    if (!user) {
+      throw new AppError(401, "Invalid refresh token.");
+    }
+
+    const isRefreshTokenValid = user.refreshTokenHash
+      ? await bcrypt.compare(refreshToken, user.refreshTokenHash)
+      : false;
+
+    if (!isRefreshTokenValid) {
+      throw new AppError(401, "Refresh token invalid or revoked.");
+    }
+
+    const accessToken = signToken(
+      {
+        sub: user._id.toString(),
+        email: user.email,
+        name: user.name,
+      },
+      env.ACCESS_TOKEN_SECRET,
+      env.ACCESS_TOKEN_EXPIRY,
+    );
+
+    const rotatedRefreshToken = signToken(
+      {
+        sub: user._id.toString(),
+        email: user.email,
+        name: user.name,
+      },
+      env.REFRESH_TOKEN_SECRET,
+      env.REFRESH_TOKEN_EXPIRY,
+    );
+
+    const newRefreshTokenHash = bcrypt.hashSync(rotatedRefreshToken, SALT_ROUNDS);
+    await setRefreshTokenHash(user._id.toString(), newRefreshTokenHash);
+
+    res.setHeader("Authorization", `Bearer ${accessToken}`);
+    res.cookie("refreshToken", rotatedRefreshToken, getRefreshTokenCookieOptions());
+    res.status(200).json({
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+      },
+      accessToken,
+      refreshToken: rotatedRefreshToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
