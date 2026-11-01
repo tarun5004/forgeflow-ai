@@ -20,3 +20,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(projects): create titled projects and announce them | Validate project titles, persist the owner relationship, and send project_created events for downstream AI records. | Tests deferred by user |
 | feat(runtime): provision and remove Kubernetes project resources | Create the shared-volume Next.js, file API and sync pod plus its service; provide cleanup operations for lifecycle failures. | Tests deferred by user |
 | feat(runtime): track preview activity in Redis | Refresh an expiring activity key and publish access events so runtime lifetime can follow actual traffic. | Tests deferred by user |
+| feat(projects): launch owned project runtimes | Reserve the launching state, provision runtime resources, save the preview address, and clean up failed launches. | Tests deferred by user |
