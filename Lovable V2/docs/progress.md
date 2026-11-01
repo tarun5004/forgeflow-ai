@@ -22,3 +22,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(runtime): track preview activity in Redis | Refresh an expiring activity key and publish access events so runtime lifetime can follow actual traffic. | Tests deferred by user |
 | feat(projects): launch owned project runtimes | Reserve the launching state, provision runtime resources, save the preview address, and clean up failed launches. | Tests deferred by user |
 | feat(runtime): reclaim idle preview resources | Subscribe to Redis expiry events, coordinate teardown across replicas, and reset project runtime state after cleanup. | Tests deferred by user |
+| feat(runtime): proxy preview and file service traffic | Route runtime hostnames to their Kubernetes services, cache proxy handlers, and invalidate them after idle teardown. | Tests deferred by user |
