@@ -1,0 +1,57 @@
+# Local environment and credentials; only reviewed examples may be tracked.
+.env
+.env.*
+!.env.example
+!.env.*.example
+.aws/
+.kube/
+kubeconfig
+kubeconfig.*
+credentials
+credentials.json
+*-credentials.json
+service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets.yml
+secrets.yaml
+
+# Dependencies and generated output. Keep package-lock.json files.
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+.next/
+out/
+*.tsbuildinfo
+.cache/
+.npm/
+.npm_cache/
+.turbo/
+.vercel/
+logs/
+*.log
+
+# Local data, database exports, and runtime work folders.
+*.bson
+*.sqlite
+*.sqlite3
+*.db
+*.rdb
+*.aof
+/runtime-data/
+/user-data/
+/loveable-main/runtime-data/
+/loveable-main/user-data/
+
+# Machine-specific settings and local verification artifacts.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+/.superpowers/
