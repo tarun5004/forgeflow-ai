@@ -1,11 +1,16 @@
+/**
+ * Express controllers for auth endpoints.
+ */
 import bcrypt from "bcryptjs";
 import type { NextFunction, Request, Response } from "express";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
+
 import { env } from "../config/env.js";
 import { createUser, findUserByEmail, findUserById, setRefreshTokenHash } from "../DAO/user.dao.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import type { AuthTokenPayload, LoginRequestBody, RegisterRequestBody, UserInfo } from "../types/user.js";
 import { getRefreshTokenCookieOptions } from "../utils/token.util.js";
+
 const SALT_ROUNDS = 10;
 
 /**
@@ -51,6 +56,46 @@ function validateRequiredString(value: unknown, fieldName: string): string {
   }
 
   return trimmed;
+}
+
+/**
+ * Builds a response payload with access and refresh tokens for auth responses.
+ *
+ * @param res - Express response instance.
+ * @param user - Authenticated user payload.
+ */
+function issueTokens(res: Response, user: { id: string; email: string; name: string }): void {
+  const accessToken = signToken(
+    {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+    },
+    env.ACCESS_TOKEN_SECRET,
+    env.ACCESS_TOKEN_EXPIRY,
+  );
+
+  const refreshToken = signToken(
+    {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+    },
+    env.REFRESH_TOKEN_SECRET,
+    env.REFRESH_TOKEN_EXPIRY,
+  );
+
+  res.setHeader("Authorization", `Bearer ${accessToken}`);
+  res.cookie("refreshToken", refreshToken, getRefreshTokenCookieOptions());
+  res.status(200).json({
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+    accessToken,
+    refreshToken,
+  });
 }
 
 /**
@@ -211,41 +256,6 @@ export async function login(
 }
 
 /**
- * Returns the current authenticated user profile.
- *
- * @route GET /api/auth/me
- * @param req - Incoming request with authenticated user attached.
- * @param res - Express response.
- * @param next - Error middleware callback.
- */
-export async function me(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    if (!req.user) {
-      throw new AppError(401, "Unauthenticated.");
-    }
-
-    const user = await findUserById(req.user.id);
-    if (!user) {
-      throw new AppError(401, "User not found.");
-    }
-
-    const payload: UserInfo = {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-    };
-
-    res.status(200).json(payload);
-  } catch (error) {
-    next(error);
-  }
-}
-
-/**
  * Refreshes the access token using an HTTP-only refresh cookie.
  *
  * @route POST /api/auth/refresh
@@ -321,6 +331,75 @@ export async function refresh(
       accessToken,
       refreshToken: rotatedRefreshToken,
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Logs the user out and clears the refresh token state.
+ *
+ * @route POST /api/auth/logout
+ * @param req - Incoming request containing the refresh token cookie.
+ * @param res - Express response.
+ * @param next - Error middleware callback.
+ */
+export async function logout(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const refreshToken = req.cookies?.refreshToken as string | undefined;
+
+    if (refreshToken) {
+      try {
+        const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET) as { sub?: string };
+        if (decoded.sub) {
+          await setRefreshTokenHash(decoded.sub, null);
+        }
+      } catch {
+        // Ignore malformed/expired refresh token and still clear cookie.
+      }
+    }
+
+    res.clearCookie("refreshToken");
+    res.status(200).json({ message: "Logged out successfully." });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Returns the current authenticated user profile.
+ *
+ * @route GET /api/auth/me
+ * @param req - Incoming request with authenticated user attached.
+ * @param res - Express response.
+ * @param next - Error middleware callback.
+ */
+export async function me(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    if (!req.user) {
+      throw new AppError(401, "Unauthenticated.");
+    }
+
+    const user = await findUserById(req.user.id);
+    if (!user) {
+      throw new AppError(401, "User not found.");
+    }
+
+    const payload: UserInfo = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    };
+
+    res.status(200).json(payload);
   } catch (error) {
     next(error);
   }

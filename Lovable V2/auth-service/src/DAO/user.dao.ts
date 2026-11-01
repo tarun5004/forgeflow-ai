@@ -1,5 +1,10 @@
+/**
+ * Data access object for user persistence and auth token hashing.
+ */
 import type { HydratedDocument } from "mongoose";
+
 import { User, type UserDocumentType } from "../models/user.model.js";
+
 export type UserDocumentLike = HydratedDocument<UserDocumentType>;
 
 /**
@@ -10,6 +15,16 @@ export type UserDocumentLike = HydratedDocument<UserDocumentType>;
  */
 export async function findUserByEmail(email: string): Promise<UserDocumentLike | null> {
   return User.findOne({ email: email.toLowerCase() }).exec();
+}
+
+/**
+ * Finds a user by their unique id.
+ *
+ * @param userId - Mongo user id.
+ * @returns Matching user document or null.
+ */
+export async function findUserById(userId: string): Promise<UserDocumentLike | null> {
+  return User.findById(userId).exec();
 }
 
 /**
@@ -44,11 +59,11 @@ export async function setRefreshTokenHash(
 }
 
 /**
- * Finds a user by their unique id.
+ * Returns a user with the stored refresh-token hash for verification.
  *
- * @param userId - Mongo user id.
+ * @param userId - Unique user id.
  * @returns Matching user document or null.
  */
-export async function findUserById(userId: string): Promise<UserDocumentLike | null> {
-  return User.findById(userId).exec();
+export async function getUserWithRefreshToken(userId: string): Promise<UserDocumentLike | null> {
+  return User.findById(userId).select("refreshTokenHash").exec();
 }
