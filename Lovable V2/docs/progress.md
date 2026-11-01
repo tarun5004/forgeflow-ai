@@ -42,3 +42,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | build(template): package the preview development server | Install runtime dependencies in the container and expose the Next.js development server on port 3000. | Tests deferred by user |
 | feat(frontend): add branded Vite application shell | Configure the Vite entrypoint, shared styles, visual assets, and branded application shell. | Tests deferred by user |
 | feat(frontend): add registration and session login flows | Provide registration and login forms, cookie-backed session restoration, protected routes, user profiles and sign out. | Tests deferred by user |
+| feat(frontend): add project creation and runtime navigation | List and create projects, navigate into workspaces, and launch or retry their runtimes. | Tests deferred by user |
