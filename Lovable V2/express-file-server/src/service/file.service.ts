@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { IGNORED_DIRS, IGNORED_FILES, WORK_FOLDER } from "../config/env.js";
-import { toApiPath } from "../utils/path.util.js";
+import { HttpError, toAbsolutePath, toApiPath } from "../utils/path.util.js";
 
 export async function getFileTree(): Promise<string[]> {
   const files: string[] = [];
@@ -24,5 +24,22 @@ export async function getFileTree(): Promise<string[]> {
 
   await walk(WORK_FOLDER);
   return files.sort();
+}
+
+export async function readFiles(filenames: string[]): Promise<Record<string, string>> {
+  const contents: Record<string, string> = {};
+
+  await Promise.all(
+    filenames.map(async (filename) => {
+      const absolute = toAbsolutePath(filename);
+      try {
+        contents[filename] = await fs.readFile(absolute, "utf8");
+      } catch {
+        throw new HttpError(404, `File not found: ${filename}`);
+      }
+    }),
+  );
+
+  return contents;
 }
 
