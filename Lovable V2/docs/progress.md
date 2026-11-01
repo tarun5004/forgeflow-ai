@@ -26,3 +26,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(files): expose the runtime file tree | Walk the runtime folder, omit configured generated paths, and return a sorted project-relative file tree. | Tests deferred by user |
 | feat(files): read selected runtime files | Parse requested filenames, resolve project-relative paths, and return UTF-8 contents through the file API. | Tests deferred by user |
 | feat(files): create update and delete runtime files | Validate filename-to-content payloads, create parent directories, write files, and remove selected paths. | Tests deferred by user |
+| feat(sync): add project-scoped S3 object storage | Configure the S3 client, project prefixes, file filters, bounded transfers, and object upload download list and delete operations. | Tests deferred by user |
