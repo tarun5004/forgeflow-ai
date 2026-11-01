@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, LoaderCircle, RotateCcw } from 'lucide-react'
 import { Link, useLocation, useParams } from 'react-router'
+import { filesApi } from '../api/files.js'
 import { projectsApi } from '../api/projects.js'
 import { Brand } from '../components/Brand.jsx'
+import { CodeEditorPane } from '../components/workspace/CodeEditorPane.jsx'
+import { FileExplorer } from '../components/workspace/FileExplorer.jsx'
 
 function entityId(entity) {
   return entity?._id || entity?.id
@@ -22,6 +25,11 @@ export function WorkspacePage() {
   const [project, setProject] = useState(initialProject)
   const [isStarting, setIsStarting] = useState(!initialProject?.runtimeId)
   const [startupError, setStartupError] = useState('')
+  const [filePaths, setFilePaths] = useState([])
+  const [fileError, setFileError] = useState('')
+  const [tabs, setTabs] = useState([])
+  const [activePath, setActivePath] = useState(null)
+  const [isSaving, setIsSaving] = useState(false)
   const runtimeId = project?.runtimeId
 
   useEffect(() => {
@@ -83,6 +91,117 @@ export function WorkspacePage() {
     }
   }, [initialProject, projectId])
 
+  useEffect(() => {
+    if (!runtimeId) return undefined
+    let active = true
+
+    filesApi
+      .tree(runtimeId)
+      .then((paths) => {
+        if (active) setFilePaths(paths)
+      })
+      .catch((requestError) => {
+        if (active) setFileError(requestError.message)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [runtimeId])
+
+  async function refreshFiles() {
+    if (!runtimeId) return
+    setFileError('')
+    try {
+      setFilePaths(await filesApi.tree(runtimeId))
+    } catch (requestError) {
+      setFileError(requestError.message)
+    }
+  }
+
+  async function openFile(path) {
+    setActivePath(path)
+    if (tabs.some((tab) => tab.path === path) || !runtimeId) return
+
+    try {
+      const files = await filesApi.read(runtimeId, [path])
+      setTabs((current) =>
+        current.some((tab) => tab.path === path)
+          ? current
+          : [...current, { path, content: files[path] || '', isDirty: false }],
+      )
+    } catch (requestError) {
+      setFileError(requestError.message)
+    }
+  }
+
+  function changeFile(path, content) {
+    setTabs((current) =>
+      current.map((tab) =>
+        tab.path === path ? { ...tab, content, isDirty: true } : tab,
+      ),
+    )
+  }
+
+  async function saveFile(path) {
+    const tab = tabs.find((item) => item.path === path)
+    if (!tab || !runtimeId || !tab.isDirty) return
+
+    setIsSaving(true)
+    setFileError('')
+    try {
+      await filesApi.update(runtimeId, { [path]: tab.content })
+      setTabs((current) =>
+        current.map((item) =>
+          item.path === path ? { ...item, isDirty: false } : item,
+        ),
+      )
+    } catch (requestError) {
+      setFileError(requestError.message)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  function closeFile(path) {
+    const tab = tabs.find((item) => item.path === path)
+    if (tab?.isDirty && !window.confirm(`Close ${path} without saving?`)) return
+
+    const nextTabs = tabs.filter((item) => item.path !== path)
+    setTabs(nextTabs)
+    if (activePath === path) {
+      setActivePath(nextTabs.at(-1)?.path || null)
+    }
+  }
+
+  function relocateOpenPaths(source, destination) {
+    setTabs((current) =>
+      current.map((tab) =>
+        tab.path === source || tab.path.startsWith(`${source}/`)
+          ? { ...tab, path: `${destination}${tab.path.slice(source.length)}` }
+          : tab,
+      ),
+    )
+    setActivePath((current) =>
+      current && (current === source || current.startsWith(`${source}/`))
+        ? `${destination}${current.slice(source.length)}`
+        : current,
+    )
+  }
+
+  function removeOpenPaths(source) {
+    setTabs((current) =>
+      current.filter(
+        (tab) => tab.path !== source && !tab.path.startsWith(`${source}/`),
+      ),
+    )
+    setActivePath((current) =>
+      current && (current === source || current.startsWith(`${source}/`))
+        ? null
+        : current,
+    )
+  }
+
   if (isStarting) {
     return (
       <main className="grid min-h-svh place-items-center bg-[#111116] text-white">
@@ -115,14 +234,55 @@ export function WorkspacePage() {
   }
 
   return (
-    <main className="min-h-svh bg-[#111116] p-6 text-white">
-      <Link className="inline-flex items-center gap-2 text-sm text-cyan-400" to="/projects">
-        <ArrowLeft className="size-4" /> Projects
-      </Link>
-      <div className="mt-8"><Brand compact inverse monochrome /></div>
-      <h1 className="mt-6 text-2xl font-extrabold">{project.title}</h1>
-      <p className="mt-3 text-sm text-zinc-400">Project status: {project.status}</p>
-      {runtimeId && <p className="mt-2 font-mono text-xs text-zinc-500">Runtime: {runtimeId}</p>}
+    <main className="workspace-shell h-svh overflow-hidden bg-[#111116] text-white">
+      <header className="flex h-13 items-center justify-between border-b border-white/8 bg-[#17171d] px-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Link className="grid size-8 shrink-0 place-items-center rounded text-zinc-500 hover:bg-white/5 hover:text-white" to="/projects" aria-label="Back to projects" title="Back to projects">
+            <ArrowLeft className="size-4" />
+          </Link>
+          <div className="hidden border-r border-white/8 pr-4 sm:block">
+            <Brand compact inverse monochrome />
+          </div>
+          <div className="min-w-0">
+            <h1 className="truncate text-xs font-extrabold text-zinc-200">{project.title}</h1>
+            <p className="mt-0.5 flex items-center gap-1.5 text-[9px] font-bold uppercase text-emerald-500">
+              <span className="size-1.5 rounded-full bg-emerald-400" />
+              Runtime active
+            </p>
+          </div>
+        </div>
+        {fileError && (
+          <button className="flex max-w-64 items-center gap-2 truncate rounded bg-red-500/10 px-2.5 py-1.5 text-[10px] font-semibold text-red-300" type="button" onClick={refreshFiles} title={fileError}>
+            <RotateCcw className="size-3 shrink-0" />
+            <span className="truncate">File service unavailable</span>
+          </button>
+        )}
+      </header>
+
+      <div className="h-[calc(100svh-52px)]">
+        <div className="h-full min-h-0 min-w-0">
+            <div className="workspace-code-grid h-full">
+              <FileExplorer
+                runtimeId={runtimeId}
+                filePaths={filePaths}
+                activePath={activePath}
+                onOpen={openFile}
+                onRefresh={refreshFiles}
+                onRelocate={relocateOpenPaths}
+                onRemove={removeOpenPaths}
+              />
+              <CodeEditorPane
+                tabs={tabs}
+                activePath={activePath}
+                onSelect={setActivePath}
+                onClose={closeFile}
+                onChange={changeFile}
+                onSave={saveFile}
+                isSaving={isSaving}
+              />
+            </div>
+        </div>
+      </div>
     </main>
   )
 }
