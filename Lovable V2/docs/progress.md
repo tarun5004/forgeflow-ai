@@ -50,3 +50,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | build(k8s): configure the project service deployment | Configure the Project deployment, runtime manager service account, Redis and broker connections, and internal routing. | Tests deferred by user |
 | build(k8s): configure the ai service deployment | Configure the AI deployment, provider and database secret references, health probes, resources, and its internal service. | Tests deferred by user |
 | build(k8s): connect ingress runtime permissions and secret templates | Route API preview and file traffic, allow runtime resource management, and document required secret keys using placeholders. | Tests deferred by user |
+| build: configure service image and manifest orchestration | Define container build contexts, image tagging, target platform, and the Kubernetes manifests used by Skaffold. | Tests deferred by user |
