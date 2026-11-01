@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, LoaderCircle, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Code2, Eye, LoaderCircle, RotateCcw } from 'lucide-react'
 import { Link, useLocation, useParams } from 'react-router'
 import { filesApi } from '../api/files.js'
 import { projectsApi } from '../api/projects.js'
@@ -7,6 +7,7 @@ import { Brand } from '../components/Brand.jsx'
 import { ChatPanel } from '../components/workspace/ChatPanel.jsx'
 import { CodeEditorPane } from '../components/workspace/CodeEditorPane.jsx'
 import { FileExplorer } from '../components/workspace/FileExplorer.jsx'
+import { PreviewPane } from '../components/workspace/PreviewPane.jsx'
 
 function entityId(entity) {
   return entity?._id || entity?.id
@@ -31,6 +32,7 @@ export function WorkspacePage() {
   const [tabs, setTabs] = useState([])
   const [activePath, setActivePath] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [mode, setMode] = useState('code')
   const runtimeId = project?.runtimeId
 
   useEffect(() => {
@@ -234,6 +236,19 @@ export function WorkspacePage() {
     )
   }
 
+  const previewUrl = project.previewUrl || (runtimeId ? `http://${runtimeId}.preview.localhost` : '')
+  const modeControl = (
+    <button
+      className="flex h-9 items-center gap-1.5 rounded-md border border-cyan-400/30 bg-cyan-700 px-2.5 text-[10px] font-extrabold text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] hover:bg-cyan-600"
+      type="button"
+      onClick={() => setMode((current) => (current === 'code' ? 'preview' : 'code'))}
+      title={mode === 'code' ? 'Show preview' : 'Show code'}
+    >
+      {mode === 'code' ? <Eye className="size-3.5" /> : <Code2 className="size-3.5" />}
+      {mode === 'code' ? 'Preview' : 'Code'}
+    </button>
+  )
+
   return (
     <main className="workspace-shell h-svh overflow-hidden bg-[#111116] text-white">
       <header className="flex h-13 items-center justify-between border-b border-white/8 bg-[#17171d] px-3">
@@ -261,7 +276,8 @@ export function WorkspacePage() {
       </header>
 
       <div className="workspace-grid h-[calc(100svh-52px)]">
-        <div className="h-full min-h-0 min-w-0">
+        <div className="min-h-0 min-w-0">
+          {mode === 'code' ? (
             <div className="workspace-code-grid h-full">
               <FileExplorer
                 runtimeId={runtimeId}
@@ -282,8 +298,11 @@ export function WorkspacePage() {
                 isSaving={isSaving}
               />
             </div>
+          ) : (
+            <PreviewPane previewUrl={previewUrl} />
+          )}
         </div>
-        <ChatPanel projectId={projectId} />
+        <ChatPanel projectId={projectId} modeControl={modeControl} />
       </div>
     </main>
   )

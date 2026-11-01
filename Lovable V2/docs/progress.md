@@ -45,3 +45,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(frontend): add project creation and runtime navigation | List and create projects, navigate into workspaces, and launch or retry their runtimes. | Tests deferred by user |
 | feat(frontend): add runtime file explorer and editor operations | Browse runtime files, edit and save tabs, create delete rename and move entries, and support keyboard saving. | Tests deferred by user |
 | feat(frontend): add conversation history and streaming chat | Select conversations, load message history, render streamed responses, and handle cancellation timeout and error states. | Tests deferred by user |
+| feat(frontend): add integrated runtime preview controls | Switch between editor and runtime preview, refresh the embedded page, and open the preview in a separate tab. | Tests deferred by user |
