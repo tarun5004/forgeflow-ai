@@ -1,3 +1,4 @@
+import { createAuthRouter } from "../routes/auth.routes.js";
 /**
  * Express application factory and middleware wiring.
  */
@@ -25,6 +26,7 @@ export function createApp() {
   });
 
 
+  app.use("/api/auth", createAuthRouter());
   app.use(errorMiddleware);
 
   return app;
