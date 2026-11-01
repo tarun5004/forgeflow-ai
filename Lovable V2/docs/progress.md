@@ -33,3 +33,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(ai): consume project creation events | Connect the message broker and create AI-side project records from project_created messages. | Tests deferred by user |
 | feat(ai): manage conversations within owned projects | Authenticate callers, enforce project ownership, and create or list their conversations. | Tests deferred by user |
 | feat(ai): return conversation message history | Persist user assistant and tool messages while exposing only readable user and assistant content to conversation owners. | Tests deferred by user |
+| feat(ai): add runtime filesystem tools | Expose validated file-tree read create update and delete tools against the selected runtime file service. | Tests deferred by user |
