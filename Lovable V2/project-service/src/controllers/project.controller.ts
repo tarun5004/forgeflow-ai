@@ -1,6 +1,8 @@
 import type { NextFunction, Request, Response } from "express"
 import { AppError } from "../middlewares/error.middleware.js"
 import { Project } from "../models/project.model.js"
+import { createProject } from "../service/project.service.js"
+import { publishMessage } from "../service/broker.service.js"
 
 
 
@@ -11,6 +13,25 @@ export async function listProjectsController(req: Request, res: Response, next: 
             .lean()
 
         res.status(200).json({ projects })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+export async function createProjectController(req: Request, res: Response, next: NextFunction) {
+    try {
+        const title = typeof req.body?.title === "string" ? req.body.title.trim() : ""
+
+        if (!title || title.length > 120) {
+            throw new AppError(400, "Title must contain between 1 and 120 characters")
+        }
+
+        const project = await createProject(req.user!.id, title)
+
+        await publishMessage("project_created", JSON.stringify({ projectId: project.id, userId: req.user!.id }))
+
+        res.status(201).json({ project })
     } catch (error) {
         next(error)
     }
