@@ -1,8 +1,8 @@
-# Lovable V2 workflow
+# ForgeFlow AI workflow
 
-Use ../loveable-main as the read-only implementation reference. Preserve the service boundaries, APIs, stack, filenames, and all seven package lockfiles.
+Read the relevant implementation before making changes. Preserve service boundaries, APIs, stack, filenames, and all seven package lockfiles.
 
-- Work in the existing outer Git repository; preserve history and use real timestamps. No push or cloud deployment.
+- Work in the outer Git repository; preserve history and use real timestamps. The user authorized publishing this project to the new GitHub repository tarun5004/forgeflow-ai. Cloud deployment is not authorized.
 - Latest user direction: finish all application code first in small functional commits. Tests, runtime verification, and bug fixes are a separate later phase.
 - Commit messages describe the feature's behavior and purpose. Do not add source-provenance boilerplate or invented authorship/history.
 - Direct commits on main are authorized; branches and local merge commits are optional. Preserve branches already created.

@@ -13,4 +13,4 @@ Current phase: complete all seven packages and deployment configuration in small
 9. Verify file completeness, lockfile equality, credential exclusions, staging scope, and commit coverage. These are repository-integrity checks, not application tests.
 10. Later, test each feature and fix confirmed defects in separate commits. Then run the local cross-service/browser flow when Docker resources and provider availability allow it.
 
-No architecture rewrite or new application dependency is planned. Do not backdate, rewrite existing commits, push, or deploy cloud resources.
+No architecture rewrite or new application dependency is planned. Do not backdate, rewrite existing commits, or deploy cloud resources. The user subsequently authorized publishing the code and project documentation to GitHub.

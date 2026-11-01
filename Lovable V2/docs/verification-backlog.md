@@ -25,4 +25,4 @@ The user requested finishing all code commits before testing and fixing features
 - Local Compose configuration and ignored environment setup are committed. No deployment was performed in this phase. The Kubernetes manifests and image references still require the later localhost configuration pass.
 - Earlier local infrastructure work encountered severe host-memory pressure and Docker HTTP 500/timeouts. RabbitMQ readiness and the complete dependency stack are unverified; no kind cluster was completed. Existing unrelated containers were preserved.
 - The one previously authorized real Mistral request returned HTTP 429. Successful inference and generated-code execution are unverified. Do not make further provider calls without fresh authorization.
-- No cloud deployment or remote push is authorized.
+- GitHub publication is authorized for the project showcase. Cloud deployment and additional real-provider calls remain outside the current authorization.

@@ -1,7 +1,13 @@
-# Lovable V2
+# ForgeFlow AI — Application Packages
 
-Current-time, feature-by-feature reconstruction of `../loveable-main` for a localhost student demo. The original source and previous Git history are preserved.
+AI-assisted coding workspace with React, TypeScript APIs, streaming conversations, Kubernetes project runtimes, and S3-backed file persistence.
 
-The existing React/Vite, Express/TypeScript, MongoDB, RabbitMQ, Redis, Kubernetes, Next.js and S3 SDK stack is retained. See [the implementation plan](docs/implementation-plan.md) and [verification progress](docs/progress.md).
+Read the [project README](../README.md) for the architecture diagram, complete repository structure, service responsibilities, API overview, and local development setup.
 
-Real environment files and generated demo artifacts are ignored. No cloud deployment or remote push is part of this work.
+- Seven independent npm packages retain separate manifests and lockfiles.
+- `compose.local.yml` defines supporting local data services.
+- `k8s/` and `skaffold-eks.yaml` contain deployment configuration.
+- [Verification backlog](docs/verification-backlog.md): known issues and pending feature/integration checks.
+- [Commit guide](docs/commit-guide.md): functional changes and their purposes.
+
+Real environment files, generated output, local backups, and runtime data are excluded from Git. Full-system verification is still in progress.
