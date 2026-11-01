@@ -36,3 +36,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(ai): add runtime filesystem tools | Expose validated file-tree read create update and delete tools against the selected runtime file service. | Tests deferred by user |
 | feat(ai): orchestrate the coding agent and conversation titles | Configure the Mistral agent with filesystem tools and project instructions; generate structured titles and stream agent messages. | Tests deferred by user |
 | feat(ai): stream coding conversations over server-sent events | Resolve conversation ownership, persist prompts and tool results, and stream metadata tokens completion and errors to clients. | Tests deferred by user |
+| feat(template): configure the Next.js runtime package | Define the runtime scripts, TypeScript lint and Tailwind configuration, and template editing guidance. | Tests deferred by user |
