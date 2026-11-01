@@ -18,3 +18,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(projects): add durable project event publishing | Initialize the AMQP channel and publish project lifecycle messages to durable queues. | Tests deferred by user |
 | feat(projects): list projects for the authenticated owner | Validate bearer sessions and return the caller's projects ordered by creation time. | Tests deferred by user |
 | feat(projects): create titled projects and announce them | Validate project titles, persist the owner relationship, and send project_created events for downstream AI records. | Tests deferred by user |
+| feat(runtime): provision and remove Kubernetes project resources | Create the shared-volume Next.js, file API and sync pod plus its service; provide cleanup operations for lifecycle failures. | Tests deferred by user |
