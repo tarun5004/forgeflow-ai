@@ -53,3 +53,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | build: configure service image and manifest orchestration | Define container build contexts, image tagging, target platform, and the Kubernetes manifests used by Skaffold. | Tests deferred by user |
 | docs: add deployment guidance and system diagram | Document image builds, service deployment, ingress and system topology; replace credential-bearing connection examples with an environment reference. | Tests deferred by user |
 | build(local): configure isolated demo data services | Define loopback-only MongoDB RabbitMQ Redis and S3-compatible storage, and generate ignored local environment files without overwriting user configuration. Runtime startup remains deferred. | Tests deferred by user |
+| build(auth): retain the exact dependency lockfile | Keep package versions, integrity hashes and lockfile bytes stable for subsequent installs. | Tests deferred by user |
