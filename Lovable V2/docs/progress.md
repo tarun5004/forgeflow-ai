@@ -38,3 +38,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(ai): stream coding conversations over server-sent events | Resolve conversation ownership, persist prompts and tool results, and stream metadata tokens completion and errors to clients. | Tests deferred by user |
 | feat(template): configure the Next.js runtime package | Define the runtime scripts, TypeScript lint and Tailwind configuration, and template editing guidance. | Tests deferred by user |
 | feat(template): add the application layout and visual assets | Provide the root document, theme styles, font configuration, favicon and page illustration assets. | Tests deferred by user |
+| feat(template): add the runtime starter page | Render the editable Next.js landing page with learning links and responsive light and dark layouts. | Tests deferred by user |
