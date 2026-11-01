@@ -1,0 +1,33 @@
+name: lovable-v2
+services:
+  mongo:
+    image: mongo:8.0
+    ports: ["127.0.0.1:17017:27017"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: demo
+      MONGO_INITDB_ROOT_PASSWORD: ${LOCAL_DB_PASSWORD:?Run node tools/setup-local.mjs}
+    volumes: ["mongo-data:/data/db"]
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports: ["127.0.0.1:15673:5672", "127.0.0.1:15674:15672"]
+    environment:
+      RABBITMQ_DEFAULT_USER: demo
+      RABBITMQ_DEFAULT_PASS: ${LOCAL_BROKER_PASSWORD:?Run node tools/setup-local.mjs}
+    volumes: ["rabbit-data:/var/lib/rabbitmq"]
+  redis:
+    image: redis:7.4.2-bookworm
+    ports: ["127.0.0.1:16379:6379"]
+    command: ["redis-server", "--requirepass", "${LOCAL_REDIS_PASSWORD:?Run node tools/setup-local.mjs}", "--notify-keyspace-events", "Ex"]
+  s3:
+    image: chrislusf/seaweedfs:4.21
+    ports: ["127.0.0.1:19000:8333"]
+    environment:
+      AWS_ACCESS_KEY_ID: demo
+      AWS_SECRET_ACCESS_KEY: ${LOCAL_S3_PASSWORD:?Run node tools/setup-local.mjs}
+      S3_BUCKET: lovable-v2
+    command: ["mini", "-dir=/data"]
+    volumes: ["s3-data:/data"]
+volumes:
+  mongo-data:
+  rabbit-data:
+  s3-data:
