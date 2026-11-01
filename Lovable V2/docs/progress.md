@@ -40,3 +40,4 @@ Latest user direction: finish feature commits first; application tests and fixes
 | feat(template): add the application layout and visual assets | Provide the root document, theme styles, font configuration, favicon and page illustration assets. | Tests deferred by user |
 | feat(template): add the runtime starter page | Render the editable Next.js landing page with learning links and responsive light and dark layouts. | Tests deferred by user |
 | build(template): package the preview development server | Install runtime dependencies in the container and expose the Next.js development server on port 3000. | Tests deferred by user |
+| feat(frontend): add branded Vite application shell | Configure the Vite entrypoint, shared styles, visual assets, and branded application shell. | Tests deferred by user |
