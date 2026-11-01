@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import type { NextFunction, Request, Response } from "express";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 import { env } from "../config/env.js";
-import { createUser, findUserByEmail, setRefreshTokenHash } from "../DAO/user.dao.js";
+import { createUser, findUserByEmail, findUserById, setRefreshTokenHash } from "../DAO/user.dao.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import type { AuthTokenPayload, LoginRequestBody, RegisterRequestBody, UserInfo } from "../types/user.js";
 import { getRefreshTokenCookieOptions } from "../utils/token.util.js";
@@ -205,6 +205,41 @@ export async function login(
       accessToken,
       refreshToken,
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Returns the current authenticated user profile.
+ *
+ * @route GET /api/auth/me
+ * @param req - Incoming request with authenticated user attached.
+ * @param res - Express response.
+ * @param next - Error middleware callback.
+ */
+export async function me(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    if (!req.user) {
+      throw new AppError(401, "Unauthenticated.");
+    }
+
+    const user = await findUserById(req.user.id);
+    if (!user) {
+      throw new AppError(401, "User not found.");
+    }
+
+    const payload: UserInfo = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    };
+
+    res.status(200).json(payload);
   } catch (error) {
     next(error);
   }

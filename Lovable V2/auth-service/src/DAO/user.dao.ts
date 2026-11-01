@@ -42,3 +42,13 @@ export async function setRefreshTokenHash(
 ): Promise<void> {
   await User.findByIdAndUpdate(userId, { refreshTokenHash }).exec();
 }
+
+/**
+ * Finds a user by their unique id.
+ *
+ * @param userId - Mongo user id.
+ * @returns Matching user document or null.
+ */
+export async function findUserById(userId: string): Promise<UserDocumentLike | null> {
+  return User.findById(userId).exec();
+}
